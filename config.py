@@ -20,9 +20,9 @@ def get_args():
     parser.add_argument("--lr", type=float, default=4e-5)
     parser.add_argument("--num_warmup_steps", type=int, default=5)
     parser.add_argument("--epochs", type=int, default=2)
-    parser.add_argument("--print_iter", default=20, type=int)
+    parser.add_argument("--print_iter", default=100, type=int)
     parser.add_argument("--patience", default=10, type=int)
-    parser.add_argument("--bsz", type=int, default=32)  # batch size
+    parser.add_argument("--bsz", type=int, default=4)  # batch size
     parser.add_argument("--eval_bsz", type=int, default=1)
     parser.add_argument("--test_bsz", type=int, default=1)
 

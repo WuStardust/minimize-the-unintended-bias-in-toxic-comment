@@ -92,6 +92,7 @@ def train_model(args, model, epochs, optimizer, scheduler, dataloaders, device, 
                         optimizer.step()
                         scheduler.step()
                         if iteration % print_iter == 0:
+                            model.save_pretrained(args.save_path)
                             print('Iteration {}: loss = {:4f}'.format(iteration, loss), flush=True)
 
                 this_loss = (this_loss / iter_per_epoch)
