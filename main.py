@@ -96,7 +96,7 @@ def train_model(args, model, epochs, optimizer, scheduler, dataloaders, device, 
 
                 this_loss = (this_loss / iter_per_epoch)
                 # this_acc = (this_acc / iter_per_epoch)
-                print('Loss = {:4f}, Acc = {:4f}'.format(this_loss, this_acc), flush=True)
+                # print('Loss = {:4f}, Acc = {:4f}'.format(this_loss, this_acc), flush=True)
 
                 if phase == 'train':
                     train_losses.append(this_loss)
