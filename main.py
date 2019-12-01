@@ -13,6 +13,8 @@ from src.model import ToxicClassifier
 
 import torch
 from torch import nn
+import pickle
+# from torch.utils.checkpoint import checkpoint
 
 # import copy
 
@@ -92,8 +94,18 @@ def train_model(args, model, epochs, optimizer, scheduler, dataloaders, device, 
                         optimizer.step()
                         scheduler.step()
                         if iteration % print_iter == 0:
-                            model.save_pretrained(args.save_path)
+                            # model.save_pretrained(args.save_path)
                             print('Iteration {}: loss = {:4f}'.format(iteration, loss), flush=True)
+
+                        if iteration % 80000 == 0:
+                            # save checkpoints
+                            torch.save({
+                                'epoch': epoch,
+                                'model_state_dict': model.state_dict(),
+                                'optimizer_state_dict': optimizer.state_dict(),
+                                'scheduler_state_dict': scheduler.state_dict(),
+                                'iteration': iteration
+                            }, os.path.join('./checkpoints', 'ckpt_{:02d}.pth.tar'.format(epoch)))
 
                 this_loss = (this_loss / iter_per_epoch)
                 # this_acc = (this_acc / iter_per_epoch)
@@ -172,8 +184,8 @@ def main():
     print('Program Start...')
     args = get_args()
 
-    # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cpu')
 
     # config_class = BertConfig
     # model_class = BertForSequenceClassification
@@ -182,11 +194,21 @@ def main():
     # config = config_class.from_pretrained(args['model_name_or_path'])  # eg: bert-base-uncased
 
     print('get data loader...')
-    dataloaders = get_dataloader(args, BertTokenizer, 'bert-base-uncased')  # args.model_name_or_path)
+    # dataloaders = get_dataloader(args, BertTokenizer, 'bert-base-uncased')  # args.model_name_or_path)
+    # with open('./data/datalaoders.pickle', 'wb') as handle:
+    #     pickle.dump(dataloaders, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    # model = model_class.from_pretrained(args['model_name_or_path'], from_tf=bool('.ckpt' in args.model_name_or_path),
-    #                                     config=config)
+    with open('./data/datalaoders.pickle', 'rb') as handle:
+        dataloaders = pickle.load(handle)
+
+    print('load models...')
+    # ckp = torch.load('./checkpoints/ckpt_01.pth.tar')
+
     model = ToxicClassifier.from_pretrained('bert-base-uncased', num_labels=18).to(device=device)
+    # model.load_state_dict(ckp['model_state_dict'])
+
+    for p in model.bert.embeddings.parameters():
+        p.requires_grad = False
 
     optimizer_grouped_parameters = [
         {
@@ -201,9 +223,12 @@ def main():
 
     optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr,
                       correct_bias=False)  # To reproduce BertAdam specific behavior set correct_bias=False
+    # optimizer.load_state_dict(ckp['optimizer_state_dict'])
+
     # PyTorch scheduler
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=args.num_warmup_steps,
                                                 num_training_steps=args.epochs * len(dataloaders['train']) // ACCUM_STEPS)
+    # scheduler.load_state_dict(ckp['scheduler_state_dict'])
 
     print('start training...')
     train_model(

@@ -3,9 +3,8 @@
 
 # In[3]:
 
-
-# import os
-# import pickle
+# import multiprocessing
+# from functools import partial
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 # import torch.utils.data as data
@@ -55,6 +54,22 @@ def get_tokenizer(tokenizer_class, tokenizer_name):
                          "and name as {}".format(tokenizer_class, tokenizer_name))
     return tokenizer
 
+
+# def my_tokenize(data, tokenizer_class, tokenizer_name):
+#     tokenizer = get_tokenizer(tokenizer_class, tokenizer_name)
+#     convert_line_uncased_with_t = partial(convert_line_uncased, tokenizer)
+#     print("Tokenizing...")
+#     with multiprocessing.Pool(processes=4) as pool:#进程池
+#         text_list = data.comment_text.tolist()
+#         sequences = pool.map(convert_line_uncased_with_t, text_list)
+#     return sequences
+
+
+# def convert_line_uncased(tokenizer, text):
+#     tokens_a = tokenizer.tokenize(text)[:MAX_LEN]
+#     one_token = tokenizer.convert_tokens_to_ids(["[CLS]"] + tokens_a)
+#     one_token += [0] * (MAX_LEN - len(tokens_a))
+#     return one_token
 
 def my_tokenize(data, tokenizer_class, tokenizer_name):
     sequences_list = []
