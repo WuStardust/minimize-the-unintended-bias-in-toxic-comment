@@ -5,3 +5,4 @@ venv
 data/*.json
 data/*.csv
 data/*.bin
+checkpoints/*.tar

@@ -202,7 +202,7 @@ def main():
         dataloaders = pickle.load(handle)
 
     print('load models...')
-    # ckp = torch.load('./checkpoints/ckpt_01.pth.tar')
+    # ckp = torch.load('./checkpoints/ckpt_00.pth.tar')
 
     model = ToxicClassifier.from_pretrained('bert-base-uncased', num_labels=18).to(device=device)
     # model.load_state_dict(ckp['model_state_dict'])
@@ -210,18 +210,18 @@ def main():
     for p in model.bert.embeddings.parameters():
         p.requires_grad = False
 
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if should_decay(n)],
-            "weight_decay": args.decay,
-        },
-        {
-            "params": [p for n, p in model.named_parameters() if not should_decay(n)],
-            "weight_decay": 0.00,
-        },
-    ]
+    # optimizer_grouped_parameters = [
+    #     {
+    #         "params": [p for n, p in model.named_parameters() if should_decay(n)],
+    #         "weight_decay": args.decay,
+    #     },
+    #     {
+    #         "params": [p for n, p in model.named_parameters() if not should_decay(n)],
+    #         "weight_decay": 0.00,
+    #     },
+    # ]
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.lr,
+    optimizer = AdamW(model.parameters(), lr=args.lr,
                       correct_bias=False)  # To reproduce BertAdam specific behavior set correct_bias=False
     # optimizer.load_state_dict(ckp['optimizer_state_dict'])
 
